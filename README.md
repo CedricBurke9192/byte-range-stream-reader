@@ -29,3 +29,10 @@ The trade-off: we still accumulate the full range in memory before resolving. Th
 - `createReadStream`'s `end` option is **inclusive**, not exclusive. This library computes `end = start + length - 1` so that `length` bytes are read. A zero-length read is short-circuited to return an empty `Buffer` without touching the filesystem (otherwise `start === end` would read one byte).
 - If the requested range extends past EOF, Node returns only the bytes that exist. This library resolves with that shorter `Buffer` rather than rejecting — callers who need exactly `length` bytes should check `buf.length`.
 - Non-integer or negative `start`/`length` throw `TypeError` before any I/O is attempted.
+
+## Performance
+
+The window keeps a bounded buffer, so `push` is constant time and memory does not
+grow with the length of the stream. `peak` and `trough` are linear in the window
+size, which is the trade that keeps `push` cheap.
+
